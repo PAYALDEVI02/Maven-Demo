@@ -9,7 +9,7 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 
 # Copy the rest of the source code
-COPY Myspace/src ./src
+COPY src ./src
 
 # Package the application
 RUN mvn clean package -DskipTests
