@@ -14,18 +14,9 @@ jobs:
              contents: read
              packages: write
 
-
-     env:
-        IMAGE_NAME: ghcr.io/payaldevi02/work-app
-
      steps:
        - name: Checkout sourcecode
          uses: actions/checkout@v4
-
-       - name: Set image tag using branch and timestamp
-         run:  |
-            IMAGE_TAG="${GITHUB_REF##*/}-$(date +%Y%m%d-%H%M%S)"
-            echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
        - name: Login to GHCR
          uses: docker/login-action@v3
@@ -35,17 +26,13 @@ jobs:
             password: ${{ secrets.GITHUB_TOKEN }}
 
        - name: Build Docker Image
-         run:  |
-             docker build -t $IMAGE_NAME:$IMAGE_TAG .
-             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+         run: docker build -t ghcr.io/payaldevi02/work-app:latest .
+        
 
        - name: Run Docker Container
-         run: docker run -d -p 8080:8080 --name test-container $IMAGE_NAME:$IMAGE_TAG
+         run: docker run -d -p 8080:8080 --name test-container ghcr.io/payaldevi02/work-app:latest
               sleep 10
               docker logs test-container
-              docker stop test-container
-              docker rm test-container
 
        - name: Push Docker Image to GHCR
-         run: docker push $IMAGE_NAME:$IMAGE_TAG
-              docker push $IMAGE_NAME:latest
+         run: docker push ghcr.io/payaldevi02/work-app:latest
