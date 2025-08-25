@@ -1,4 +1,4 @@
-name: Build and run Dockerfile
+name: Build and push Docker Image to GHCR
 
 on:
   workflow_dispatch:
@@ -7,15 +7,33 @@ on:
        - main
 
 jobs:
-  build-and-run:
+  build-run-push:
      runs-on: ubuntu-latest
+
+     permissions:
+             contents: read
+             packages: write
 
      steps:
        - name: Checkout sourcecode
          uses: actions/checkout@v4
 
-       - name: Build Docker
-         run: docker build -t work-app .
+         
+
+       - name: Login to GHCR
+         uses: docker/login-action@v3
+         with: 
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+       - name: Build Docker Image
+         run: docker build -t ghcr.io/${{ github.repository_owner }}/work-app:latest .
 
        - name: Run Docker Container
-         run: docker run -d -p 8080:8080 work-app
+         run: docker run -d -p 8080:8080 --name test-container ghcr.io/${{ github.repository_owner }}/work-app:latest
+              sleep 10
+              docker logs test-container
+
+       - name: Push Docker Image to GHCR
+       - run: docker push ghcr.io/${{github.repository_owner }}/work-app:latest
