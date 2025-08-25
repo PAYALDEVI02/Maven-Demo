@@ -32,17 +32,12 @@ jobs:
             IMAGE_LATEST=ghcr.io/payaldevi02/workapp:latest
             echo "Building images: $IMAGE_TIMESTAMP and $IMAGE_LATEST"
             docker build -t $IMAGE_TIMESTAMP -t $IMAGE_LATEST .
-        
-
-       - name: Run Docker Container
-         run: |
-              docker run -d -p 8080:8080 --name test-container ghcr.io/payaldevi02/work-app:latest
-              sleep 10
-              docker logs test-container
-              docker stop test-container
-              docker rm test-container
-              
-
-       - name: Push Docker Image to GHCR
-         run: docker push ghcr.io/payaldevi02/work-app:latest
-              docker push ghcr.io/payaldevi02/work-app:$TIMESTAMP
+            
+            docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
+            sleep 10
+            docker logs test-container
+            docker stop test-container
+            docker rm test-container
+            
+            docker push $IMAGE_LATEST
+            docker push $IMAGE_TIMESTAMP
