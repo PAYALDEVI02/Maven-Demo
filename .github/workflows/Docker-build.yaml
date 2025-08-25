@@ -28,7 +28,7 @@ jobs:
        - name: Build Docker Image
          run: |
             TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            IMAGE_TIMESTAMP=ghcr.io/payaldevi02/work-spp:$TIMESTAMP
+            IMAGE_TIMESTAMP=ghcr.io/payaldevi02/work-app:$TIMESTAMP
             IMAGE_LATEST=ghcr.io/payaldevi02/workapp:latest
             echo "Building images: $IMAGE_TIMESTAMP and $IMAGE_LATEST"
             docker build -t $IMAGE_TIMESTAMP -t $IMAGE_LATEST .
