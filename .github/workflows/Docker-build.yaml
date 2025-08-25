@@ -27,11 +27,14 @@ jobs:
 
        - name: Build-run-push Docker Image
          run: |
+            REPO="ghcr.io/${{ github.repository }}"
+            REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
             COMMIT_SHA=${GITHUB_SHA::7}
-            IMAGE_SHA=ghcr.io/payaldevi02/work-app:$COMMIT_SHA
-            IMAGE_LATEST=ghcr.io/payaldevi02/work-app:latest
+
+            IMAGE_SHA="$REPO_LOWER:$COMMIT_SHA"
+            IMAGE_LATEST="$REPO_LOWER:latest"
             
-            echo "Building images: $IMAGE_TIMESTAMP and $IMAGE_LATEST"
+            echo "Building images: $IMAGE_SHA and $IMAGE_LATEST"
             docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
             
             docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
