@@ -28,12 +28,12 @@ jobs:
             password: ${{ secrets.GITHUB_TOKEN }}
 
        - name: Build Docker Image
-         run: docker build -t ghcr.io/${{ github.repository_owner }}/work-app:latest .
+         run: docker build -t ghcr.io/payaldevi02/work-app:latest .
 
        - name: Run Docker Container
-         run: docker run -d -p 8080:8080 --name test-container ghcr.io/${{ github.repository_owner }}/work-app:latest
+         run: docker run -d -p 8080:8080 --name test-container ghcr.io/payaldevi02/work-app:latest
               sleep 10
               docker logs test-container
 
        - name: Push Docker Image to GHCR
-         run: docker push ghcr.io/${{github.repository_owner }}/work-app:latest
+         run: docker push ghcr.io/payaldevi02/work-app:latest
