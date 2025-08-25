@@ -25,13 +25,14 @@ jobs:
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Build Docker Image
+       - name: Build-run-push Docker Image
          run: |
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            IMAGE_TIMESTAMP=ghcr.io/payaldevi02/work-app:$TIMESTAMP
-            IMAGE_LATEST=ghcr.io/payaldevi02/workapp:latest
+            COMMIT_SHA=${GITHUB_SHA::7}
+            IMAGE_SHA=ghcr.io/payaldevi02/work-app:$COMMIT_SHA
+            IMAGE_LATEST=ghcr.io/payaldevi02/work-app:latest
+            
             echo "Building images: $IMAGE_TIMESTAMP and $IMAGE_LATEST"
-            docker build -t $IMAGE_TIMESTAMP -t $IMAGE_LATEST .
+            docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
             
             docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
             sleep 10
@@ -40,4 +41,4 @@ jobs:
             docker rm test-container
             
             docker push $IMAGE_LATEST
-            docker push $IMAGE_TIMESTAMP
+            docker push $IMAGE_SHA
