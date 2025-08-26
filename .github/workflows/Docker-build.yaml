@@ -48,10 +48,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # Step 5: Run container using one of the tags to verify
       - name: Run container to verify image
         run: |
-          IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+          echo "All tags: ${{ steps.meta.outputs.tags }}"
+          IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1 | tr -d '[:space:]')
           echo "Running image: $IMAGE"
           docker run -d -p 8080:8080 --name test-container "$IMAGE"
           sleep 10
