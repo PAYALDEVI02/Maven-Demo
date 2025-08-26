@@ -10,6 +10,10 @@ jobs:
   build-run-push:
      runs-on: ubuntu-latest
 
+     permissions:
+             contents: read
+             packages: write
+
      steps:
        - name: Checkout sourcecode
          uses: actions/checkout@v4
@@ -21,32 +25,22 @@ jobs:
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Set up Docker metadata
-         id: meta
-         uses: docker/metadata-action@v5
-         with:
-            images: ghcr.io/${{ github.repository }}
-            tags:  |
-               type=ref,event=branch
-               type=sha
-            flavor: | 
-               latest=true
-
-       - name: Build and push Docker Image
-         uses: docker/build-push-action@v5
-         with:
-            context: .
-            push: true
-            tags: ${{ steps.meta.outputs.tags }}
-            labels: ${{ steps.meta.outputs.labels }}
-
-       - name: Run container to verify
-         run:  |
-            IMAGE=$(echo "${{ steps.meta.outputs.tag }}" | cut -d',' -f1)
-            docker run -d -p 8080:8080 --name test-container "$IMAGE"
+       - name: Build-run-push Docker Image
+         run: |
+            REPO="ghcr.io/${{ github.repository }}"
+            REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
+            COMMIT_SHA=${GITHUB_SHA::7}
+            IMAGE_SHA="$REPO_LOWER:$COMMIT_SHA"
+            IMAGE_LATEST="$REPO_LOWER:latest"
+            
+            echo "Building images: $IMAGE_SHA and $IMAGE_LATEST"
+            docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
+            
+            docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
             sleep 10
             docker logs test-container
             docker stop test-container
             docker rm test-container
             
-  
+            docker push $IMAGE_LATEST
+            docker push $IMAGE_SHA
