@@ -2,45 +2,59 @@ name: Build and push Docker Image to GHCR
 
 on:
   push:
-     branches:
-       - main
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build-run-push:
-     runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-     permissions:
-             contents: read
-             packages: write
+    permissions:
+      contents: read
+      packages: write
 
-     steps:
-       - name: Checkout sourcecode
-         uses: actions/checkout@v4
+    steps:
+      # Step 1: Checkout source code
+      - name: Checkout sourcecode
+        uses: actions/checkout@v4
 
-       - name: Login to GHCR
-         uses: docker/login-action@v3
-         with: 
-            registry: ghcr.io
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+      # Step 2: Login to GHCR
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Build-run-push Docker Image
-         run: |
-            REPO="ghcr.io/${{ github.repository }}"
-            REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
-            COMMIT_SHA=${GITHUB_SHA::7}
-            IMAGE_SHA="$REPO_LOWER:$COMMIT_SHA"
-            IMAGE_LATEST="$REPO_LOWER:latest"
-            
-            echo "Building images: $IMAGE_SHA and $IMAGE_LATEST"
-            docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
-            
-            docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
-            sleep 10
-            docker logs test-container
-            docker stop test-container
-            docker rm test-container
-            
-            docker push $IMAGE_LATEST
-            docker push $IMAGE_SHA
+      # Step 3: Generate tags using docker/metadata-action
+      - name: Set Docker image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+          flavor: |
+            latest=true
+
+      # Step 4: Build and push Docker image using those tags
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Step 5: Run container using one of the tags to verify
+      - name: Run container to verify image
+        run: |
+          IMAGE=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+          echo "Running image: $IMAGE"
+          docker run -d -p 8080:8080 --name test-container "$IMAGE"
+          sleep 10
+          docker logs test-container
+          docker stop test-container
+          docker rm test-container
