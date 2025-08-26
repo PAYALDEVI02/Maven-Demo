@@ -15,20 +15,20 @@ jobs:
       packages: write
 
     steps:
-      # Step 1: Checkout source code
+     
       - name: Code Checkout
         uses: actions/checkout@v4
 
-      # Step 2: Generate metadata with only short SHA tag
+    
       - name: Docker Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/maven-demo
           tags: |
-            type=sha,format=short
+            type=sha,format=short,prefix=
 
-      # Step 3: Login to GHCR
+     
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -36,7 +36,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 4: Build and push Docker image
+     
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -45,7 +45,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # Step 5: Run container using the same tag
+ 
       - name: Run container to verify
         run: |
           IMAGE="${{ steps.meta.outputs.tags }}"
