@@ -49,7 +49,7 @@ jobs:
  
       - name: Run container to verify
         run: |
-          IMAGE="${{ steps.meta.outputs.tags }}"
+          IMAGE="ghcr.io/${{ github.repository_owner }}/maven-demo:latest"
           echo "Running image: $IMAGE"
 
           docker pull "$IMAGE"
