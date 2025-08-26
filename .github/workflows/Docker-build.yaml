@@ -10,10 +10,6 @@ jobs:
   build-run-push:
      runs-on: ubuntu-latest
 
-     permissions:
-             contents: read
-             packages: write
-
      steps:
        - name: Checkout sourcecode
          uses: actions/checkout@v4
@@ -33,7 +29,8 @@ jobs:
             tags:  |
                type=ref,event=branch
                type=sha
-            flavor: latest
+            flavor: | 
+               latest=true
 
        - name: Build and push Docker Image
          uses: docker/build-push-action@v5
@@ -43,10 +40,10 @@ jobs:
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
 
-       - name: run container to verify
+       - name: Run container to verify
          run:  |
-            IMAGE=$(echo ${{ steps.meta.outputs.tag }} | cut -d',' -f1)
-            docker run -d -p 8080:8080 --name test-container $IMAGE
+            IMAGE=$(echo "${{ steps.meta.outputs.tag }}" | cut -d',' -f1)
+            docker run -d -p 8080:8080 --name test-container "$IMAGE"
             sleep 10
             docker logs test-container
             docker stop test-container
