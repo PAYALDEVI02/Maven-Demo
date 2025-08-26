@@ -25,23 +25,32 @@ jobs:
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Build-run-push Docker Image
-         run: |
-            REPO="ghcr.io/${{ github.repository }}"
-            REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
-            COMMIT_SHA=${GITHUB_SHA::7}
+       - name: Set up Docker metadata
+         id: meta
+         uses: docker/metadata-actions@v5
+         with:
+            images: ghcr.io/${{ github.repository }}
+            tags:  |
+               type=ref,event=branch
+               type=sha
+               type=semver,pattern={{version}}
+            flavor: ""
 
-            IMAGE_SHA="$REPO_LOWER:$COMMIT_SHA"
-            IMAGE_LATEST="$REPO_LOWER:latest"
-            
-            echo "Building images: $IMAGE_SHA and $IMAGE_LATEST"
-            docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
-            
-            docker run -d -p 8080:8080 --name test-container $IMAGE_LATEST
+       - name: Build and push Docker Image
+         uses: docker/build-push-action@v5
+         with:
+            context: .
+            push: true
+            tags: ${{ steps.meta.outputs.tag }}
+            labels: ${{ steps.meta.outputs.labels }}
+
+       - name: run container to verify
+         run:  |
+            IMAGE=$(echo ${{ steps.meta.outputs.tag }} | cut -d',' -f1)
+            docker run -d -p 8080:8080 --name test-container $IMAGE
             sleep 10
             docker logs test-container
             docker stop test-container
             docker rm test-container
             
-            docker push $IMAGE_LATEST
-            docker push $IMAGE_SHA
+  
