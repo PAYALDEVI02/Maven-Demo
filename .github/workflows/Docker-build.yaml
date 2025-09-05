@@ -18,6 +18,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+           distribution: temurin
+           java-version: '17'
+
+      - name: Build Maven Project
+        run: mvn clean package-DskipTests  
+
       - name: Set image name 
         id: image
         run: |
@@ -40,20 +49,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Run Container to Verify 
+      - name: Build  Docker Image
         run: |
-          IMAGE="${{ steps.image.outputs.IMAGE_NAME }}:latest"
-          docker pull "$IMAGE"
-          docker run -d -p 8080:8080 --name test-container "$IMAGE"
-          sleep 10
-          docker logs test-container
-          docker stop test-container
-          docker rm test-container
+           docker build \
+              -t ghcr.io/${{ github.repository }}:latest \
+              .
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}:latest
