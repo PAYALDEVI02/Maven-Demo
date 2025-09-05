@@ -14,6 +14,11 @@ COPY src ./src
 # Package the application
 RUN mvn clean package -DskipTests
 
+FROM eclipse-temurin:17-jdk-slim
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
 # Expose the port your app runs on 
 EXPOSE 8080
 
