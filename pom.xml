@@ -7,6 +7,14 @@
   <artifactId>demo</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
+	<distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/PAYALDEVI02/Maven-Demo</url>
+    </repository>
+  </distributionManagement>
+
   <name>demo</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
@@ -264,6 +272,7 @@
  
 </project>
  
+
 
 
 
