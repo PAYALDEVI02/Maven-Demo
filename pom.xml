@@ -192,7 +192,7 @@
         <plugins>
             <!-- Compiler -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
@@ -210,6 +210,14 @@
                             <version>1.6.3</version>
                         </path>
                         <path>
+		
+							<archive>
+							<manifest>
+							<mainClass>com.yourpackage.MainClass</mainClass>
+							</manifest>
+							</archive>
+
+
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
                             <version>0.2.0</version>
@@ -253,6 +261,7 @@
  
 </project>
  
+
 
 
 
