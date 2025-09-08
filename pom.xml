@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
         
  <groupId>project</groupId>
-  <artifactId>demo</artifactId>
+  <artifactId>maven</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
 	<distributionManagement>
@@ -272,6 +272,7 @@
  
 </project>
  
+
 
 
 
